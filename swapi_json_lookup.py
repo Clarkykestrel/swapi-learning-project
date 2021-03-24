@@ -47,6 +47,25 @@ def set_search_fields(lookup):
     for key, value in global_search_fields.items():
         search_fields[key] = value
 
+def get_field_id(url):
+    """
+    Extracts the field and id from a given url
+    :param url:
+    :return:
+    """
+    url = url.lstrip(swapi_base_url)
+    url.strip('/')
+    url = url.split('/')
+    field = url[0]
+    id = url[1]
+    return field, id
+
+def status_check(response):
+    if response.ok:
+        return True
+    else:
+        print(response.status_code)
+        return False
 
 def global_search(lookup):
     """
@@ -91,7 +110,6 @@ def local_search(lookup, field):
                         #results['results'].append(new_results['results'])
                         for k in range(len(new_results)):
                             listed_results.append(new_results[k])
-    print(listed_results)
     return listed_results
 
 def print_results(results):
@@ -106,6 +124,34 @@ def print_results(results):
         for key, value in cresult.items():
             print(str(key) + ': ' + str(value) + '\n', file=f)
         print('\n', file=f)
+    f.close()
+
+def check_film(lookup):
+    """
+
+    :param lookup:
+    :return:
+    """
+    lookup = lookup.lower()
+    film_rn = {'iv': '1', 'v': '2', 'vi': '3', 'i': '4', 'ii': '5', 'iii': '6'}
+    if lookup.isnumeric():
+        if int(lookup) in range(1-6):
+            return lookup
+    else:
+        if len(lookup) <= 4:
+            for key in film_rn:
+                if key == lookup:
+                    lookup = film_rn[key]
+        else:
+            search_film = local_search(lookup, 'films')
+            if len(search_film) == 1:
+                film_id = get_field_id(search_film[0]['url'])
+                lookup = film_id
+            elif len(search_film) > 1:
+                print('Two many films match given criteria')
+                lookup = '#'      
+    return lookup
+
 
 def print_scrawl(lookup):
     """
@@ -137,4 +183,8 @@ print('Beginning file print')
 print_results(global_search("star"))
 print('End file print')
 
-print_scrawl(1)
+print('HERE')
+print(check_film('iv'))
+
+#print_scrawl(1)
+print_scrawl(check_film('vi'))
